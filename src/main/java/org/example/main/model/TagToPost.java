@@ -30,6 +30,7 @@ public class TagToPost {
   private Post post;
 
   @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "tag_id")
   private Tag tag;
 
 }
