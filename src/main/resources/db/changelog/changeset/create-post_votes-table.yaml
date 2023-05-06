@@ -1,0 +1,41 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-post_votes
+      author: Viktor
+      changes:
+        - createTable:
+            tableName: post_votes
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: int
+                  constraints:
+                    nullable: false
+                    foreignKeyName: author_votes_fk
+                    referencedTableName: users
+                    referencedColumnNames: id
+              - column:
+                  name: post_id
+                  type: int
+                  constraints:
+                    nullable: false
+                    foreignKeyName: post_votes_fk
+                    referencedTableName: posts
+                    referencedColumnNames: id
+              - column:
+                  name: time
+                  type: datetime
+                  constraints:
+                    nullable: false
+              - column:
+                  name: value
+                  type: tinyint
+                  constraints:
+                    nullable: false

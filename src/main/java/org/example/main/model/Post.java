@@ -1,6 +1,8 @@
 package org.example.main.model;
 
 import java.util.Date;
+import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -11,12 +13,12 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnDefault;
 
 @Builder
 @Data
@@ -36,27 +38,23 @@ public class Post {
   /**
    * признак активности публикации
    */
-  @Column(name = "is_active", nullable = false)
+  @Column(columnDefinition = "tinyint")
   private Boolean isActive;
 
   /**
    * статус модерации
    */
-  @Enumerated(EnumType.STRING)
-  @Column(name = "moderation_status", columnDefinition = "ENUM('NEW', 'ACCEPTED', 'DECLINED')", nullable = false)
-  @ColumnDefault("NEW")
+  @Column(columnDefinition = "enum('new', 'accepted', 'declined')")
   private ModerationStatus moderationStatus;
 
   /**
    * id пользователя-модератора
    */
-  @Column(name = "moderator_id")
   private Integer moderatorId;
 
   /**
    * автор поста
    */
-  @Column(name = "user_id", nullable = false)
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id")
   private User user;
@@ -64,26 +62,31 @@ public class Post {
   /**
    * время публикации
    */
-  @Column(name = "time", columnDefinition = "datetime", nullable = false)
   private Date time;
 
   /**
    * заголовок поста
    */
-  @Column(name = "title", columnDefinition = "varchar(255)", nullable = false)
   private String title;
 
   /**
    * текст публикации
    */
-  @Column(name = "text", columnDefinition = "text", nullable = false)
+  @Column(columnDefinition = "text")
   private String text;
 
   /**
    * кол-во просмотров
    */
-  @Column(name = "view_count", nullable = false)
-  @ColumnDefault("0")
   private Integer viewCount;
+
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+  private List<PostVotes> postVotesList;
+
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+  private List<TagToPost> tagToPostList;
+
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+  private List<PostComments> postCommentsList;
 
 }

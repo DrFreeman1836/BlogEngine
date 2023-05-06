@@ -33,46 +33,47 @@ public class User {
   /**
    * признак модератора
    */
-  @Column(name = "is_moderator", nullable = false)
+  @Column(columnDefinition = "tinyint")
   private Boolean isModerator;
 
   /**
    * дата и время регистрации пользователя
    */
-  @Column(name = "reg_time", columnDefinition = "datetime", nullable = false)
   private Date regTime;
 
   /**
    * имя пользователя
    */
-  @Column(name = "name", columnDefinition = "varchar(255)", nullable = false)
   private String name;
 
   /**
    * e-mail пользователя
    */
-  @Column(name = "email", columnDefinition = "varchar(255)", nullable = false)
   private String email;
 
   /**
    * хэш пароля пользователя
    */
-  @Column(name = "password", columnDefinition = "varchar(255)", nullable = false)
   private String password;
 
   /**
    * код восстановления пароля
    */
-  @Column(name = "code", columnDefinition = "varchar(255)")
   private String code;
 
   /**
    * фотография
    */
-  @Column(name = "photo", columnDefinition = "text")
+  @Column(columnDefinition = "text")
   private String photo;
 
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<Post> listPosts;
+
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = false)
+  private List<PostVotes> postVotesList;
+
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+  private List<PostComments> postCommentsList;
 
 }

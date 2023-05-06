@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-constraint-to-tags
+      author: Viktor
+      changes:
+        - addNotNullConstraint:
+            columnDataType: varchar(255)
+            tableName: tags
+            columnName: name

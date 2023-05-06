@@ -1,0 +1,31 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-tag_to_post
+      author: Viktor
+      changes:
+        - createTable:
+            tableName: tag_to_post
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: post_id
+                  type: int
+                  constraints:
+                    nullable: false
+                    foreignKeyName: post_tag_fk
+                    referencedTableName: posts
+                    referencedColumnNames: id
+              - column:
+                  name: tag_id
+                  type: int
+                  constraints:
+                    nullable: false
+                    foreignKeyName: tag_post_fk
+                    referencedTableName: tags
+                    referencedColumnNames: id

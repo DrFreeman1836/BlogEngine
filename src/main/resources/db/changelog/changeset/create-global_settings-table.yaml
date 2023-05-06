@@ -1,0 +1,30 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-global_settings
+      author: Viktor
+      changes:
+        - createTable:
+            tableName: global_settings
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: code
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                    name: name
+                    type: varchar(255)
+                    constraints:
+                      nullable: false
+              - column:
+                    name: value
+                    type: varchar(255)
+                    constraints:
+                      nullable: false
