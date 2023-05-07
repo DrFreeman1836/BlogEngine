@@ -6,3 +6,10 @@ spring.liquibase.enabled: true
 spring.liquibase.change-log: classpath:db/changelog/db.changelog-master.yaml
 spring.jpa.show-sql: false
 spring.jpa.properties.hibernate.format_sql: false
+
+application.title: how_to_fix
+application.subtitle: how_to_fix
+application.phone: 88005553535
+application.email: email@mail.ru
+application.copyright: Viktor
+application.copyrightFrom: 2023
