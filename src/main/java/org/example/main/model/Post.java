@@ -44,7 +44,8 @@ public class Post {
   /**
    * статус модерации
    */
-  @Column(columnDefinition = "enum('new', 'accepted', 'declined')")
+  @Enumerated(EnumType.STRING)
+  @Column(columnDefinition = "enum('NEW', 'ACCEPTED', 'DECLINED')")
   private ModerationStatus moderationStatus;
 
   /**

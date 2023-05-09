@@ -1,0 +1,1 @@
+ALTER TABLE posts MODIFY moderation_status ENUM('ACCEPTED', 'DECLINED', 'NEW');
