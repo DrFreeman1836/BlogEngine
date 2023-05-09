@@ -1,9 +1,13 @@
 package org.example.main.controller;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.example.main.dto.response.RsGlobalSettingsDto;
 import org.example.main.dto.response.RsInfoBlogDto;
+import org.example.main.service.general.CalendarService;
 import org.example.main.service.general.GlobalSettingService;
 import org.example.main.service.general.TagService;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +26,8 @@ public class ApiGeneralController {
   private final RsInfoBlogDto infoBlog;
 
   private final TagService tagService;
+
+  private final CalendarService calendarService;
 
   @GetMapping("/init")
   public ResponseEntity<RsInfoBlogDto> getInfoOfBlog() {
@@ -42,6 +48,14 @@ public class ApiGeneralController {
   @GetMapping("/tag")
   public ResponseEntity<Map> getTags(@RequestParam(name = "query", required = false) String query) {
     return ResponseEntity.ok(Map.of("tags", tagService.getTagsWeight(query)));
+  }
+
+  @GetMapping("/calendar")
+  public ResponseEntity<Map> countPostByDate(@RequestParam(name = "year", required = false) Integer year) {
+    HashMap<String, List> response = new HashMap<>();
+    response.put("years", calendarService.getAllYearPublish());
+    response.put("posts", calendarService.getGroupPostsByDate(year));
+    return ResponseEntity.ok(response);
   }
 
 }
