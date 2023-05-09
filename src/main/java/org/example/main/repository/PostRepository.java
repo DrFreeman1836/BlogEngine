@@ -11,5 +11,6 @@ import org.springframework.stereotype.Repository;
 public interface PostRepository extends JpaRepository<Post, Integer> {
 
   List<Post> findByIsActiveAndModerationStatusAndTimeBefore(Boolean isActive, ModerationStatus moderationStatus, Date time);
+  Integer countByIsActiveAndModerationStatusAndTimeBefore(Boolean isActive, ModerationStatus moderationStatus, Date time);
 
 }
