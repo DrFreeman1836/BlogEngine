@@ -39,11 +39,7 @@ public class TagService {
     List<RsTagDto> listWeight = new ArrayList<>();
 
     for (TagGroupByDtoProjection tag : tagList) {
-      listWeight.add(RsTagDto
-          .builder()
-          .name(tag.getName())
-          .weight(calculateWeights(tag.getCount(), countAllPosts, countPopularTag))
-          .build());
+      listWeight.add(RsTagDto.tagDtoBuilder(tag.getName(), calculateWeights(tag.getCount(), countAllPosts, countPopularTag)));
     }
 
     return listWeight;

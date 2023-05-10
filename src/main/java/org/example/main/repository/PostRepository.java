@@ -2,6 +2,7 @@ package org.example.main.repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import org.example.main.model.ModerationStatus;
 import org.example.main.model.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,6 +16,14 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
   List<Post> findByIsActiveAndModerationStatusAndTimeBefore(Boolean isActive, ModerationStatus moderationStatus, Date time);
   Integer countByIsActiveAndModerationStatusAndTimeBefore(Boolean isActive, ModerationStatus moderationStatus, Date time);
   List<Post> findByIsActiveAndModerationStatusAndTimeBeforeAndTextContaining(Boolean isActive, ModerationStatus moderationStatus, Date time, String text);
+
+  @Query(value = "select p "
+      + "from Post p "
+      + "where p.isActive = true "
+      + "and p.moderationStatus = 'ACCEPTED' "
+      + "and p.time <= current_timestamp() "
+      + "and p.id = :id")
+  Optional<Post> findActivePostById(@Param("id") Integer id);
 
   @Query(value = "select * "
       + "from posts "

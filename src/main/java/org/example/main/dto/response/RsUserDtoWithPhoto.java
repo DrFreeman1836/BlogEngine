@@ -10,19 +10,13 @@ import org.example.main.model.User;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class RsUserDto {
+public class RsUserDtoWithPhoto extends RsUserDto {
 
-  private Integer id;
+  private String photo;
 
-  private String name;
-
+  @Override
   public void fillFields(User user) {
-    this.id = user.getId();
-    this.name = user.getName();
+    super.fillFields(user);
+    this.photo = user.getPhoto();
   }
-
-  public static RsUserDto userDtoBuilder(Integer id, String name) {
-    return new RsUserDto(id, name);
-  }
-
 }

@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.example.main.dto.response.RsPostByIdDto;
 import org.example.main.dto.response.RsPostDto;
 import org.example.main.model.Post;
 import org.example.main.service.post.ModeSorting;
@@ -58,8 +59,8 @@ public class ApiPostController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<Post> getPostById(@PathVariable Integer id) {
-    Post post = postService.getPostById(id);
+  public ResponseEntity<RsPostByIdDto> getPostById(@PathVariable Integer id) {
+    RsPostByIdDto post = postService.getPostById(id);
     if (post != null) {
       return ResponseEntity.ok(post);
     } else {

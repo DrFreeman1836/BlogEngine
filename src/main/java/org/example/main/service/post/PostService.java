@@ -4,11 +4,12 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.example.main.dto.response.RsPostByIdDto;
 import org.example.main.dto.response.RsPostDto;
-import org.example.main.dto.response.RsUserDto;
 import org.example.main.model.ModerationStatus;
 import org.example.main.model.Post;
 import org.example.main.model.Tag;
@@ -32,17 +33,11 @@ public class PostService {
   public List<RsPostDto> getPosts(ModeSorting mode) {
     List<RsPostDto> listPosts =
         postRepository.findByIsActiveAndModerationStatusAndTimeBefore(true, ModerationStatus.ACCEPTED, new Date()).stream()
-        .map(post -> RsPostDto.builder()
-            .id(post.getId())
-            .timestamp(post.getTime().getTime()/1000)
-            .user(RsUserDto.builder().id(post.getUser().getId()).name(post.getUser().getName()).build())
-            .title(post.getTitle())
-            .announce(getAnnounce(post.getText()))
-            .likeCount((int) post.getPostVotesList().stream().filter(postVotes -> postVotes.getValue() == 1).count())
-            .disLikeCount((int) post.getPostVotesList().stream().filter(postVotes -> postVotes.getValue() == -1).count())
-            .commentCount(post.getPostCommentsList().size())
-            .viewCount(post.getViewCount())
-            .build())
+        .map(post -> {
+          RsPostDto dto = new RsPostDto();
+          dto.fillFields(post);
+          return dto;
+        })
         .collect(Collectors.toList());
 
     switch (mode) {
@@ -61,33 +56,21 @@ public class PostService {
     }
     return postRepository.findByIsActiveAndModerationStatusAndTimeBeforeAndTextContaining
             (true, ModerationStatus.ACCEPTED, new Date(), query).stream()
-        .map(post -> RsPostDto.builder()
-            .id(post.getId())
-            .timestamp(post.getTime().getTime()/1000)
-            .user(RsUserDto.builder().id(post.getUser().getId()).name(post.getUser().getName()).build())
-            .title(post.getTitle())
-            .announce(getAnnounce(post.getText()))
-            .likeCount((int) post.getPostVotesList().stream().filter(postVotes -> postVotes.getValue() == 1).count())
-            .disLikeCount((int) post.getPostVotesList().stream().filter(postVotes -> postVotes.getValue() == -1).count())
-            .commentCount(post.getPostCommentsList().size())
-            .viewCount(post.getViewCount())
-            .build())
+        .map(post -> {
+          RsPostDto dto = new RsPostDto();
+          dto.fillFields(post);
+          return dto;
+        })
         .collect(Collectors.toList());
   }
 
   public List<RsPostDto> getPostsByDate(String dateString) {
     return postRepository.getPostsByDate(dateString).stream()
-        .map(post -> RsPostDto.builder()
-            .id(post.getId())
-            .timestamp(post.getTime().getTime()/1000)
-            .user(RsUserDto.builder().id(post.getUser().getId()).name(post.getUser().getName()).build())
-            .title(post.getTitle())
-            .announce(getAnnounce(post.getText()))
-            .likeCount((int) post.getPostVotesList().stream().filter(postVotes -> postVotes.getValue() == 1).count())
-            .disLikeCount((int) post.getPostVotesList().stream().filter(postVotes -> postVotes.getValue() == -1).count())
-            .commentCount(post.getPostCommentsList().size())
-            .viewCount(post.getViewCount())
-            .build())
+        .map(post -> {
+          RsPostDto dto = new RsPostDto();
+          dto.fillFields(post);
+          return dto;
+        })
         .collect(Collectors.toList());
   }
 
@@ -96,26 +79,29 @@ public class PostService {
     if (tag == null)
       return new ArrayList<>();
     return tag.getTagToPostList().stream().map(TagToPost::getPost)
-        .map(post -> RsPostDto.builder()
-            .id(post.getId())
-            .timestamp(post.getTime().getTime()/1000)
-            .user(RsUserDto.builder().id(post.getUser().getId()).name(post.getUser().getName()).build())
-            .title(post.getTitle())
-            .announce(getAnnounce(post.getText()))
-            .likeCount((int) post.getPostVotesList().stream().filter(postVotes -> postVotes.getValue() == 1).count())
-            .disLikeCount((int) post.getPostVotesList().stream().filter(postVotes -> postVotes.getValue() == -1).count())
-            .commentCount(post.getPostCommentsList().size())
-            .viewCount(post.getViewCount())
-            .build())
+        .map(post -> {
+          RsPostDto dto = new RsPostDto();
+          dto.fillFields(post);
+          return dto;
+        })
         .collect(Collectors.toList());
   }
 
-  public Post getPostById(Integer id) {
+  public RsPostByIdDto getPostById(Integer id) {
+    Optional<Post> optionalPost = postRepository.findActivePostById(id);
+    if (optionalPost.isPresent()) {
+      RsPostByIdDto postById = new RsPostByIdDto();
+      postById.fillFields(optionalPost.get());
+      viewIncrement(optionalPost.get());
+      return postById;
+    }
     return null;
   }
 
-  private String getAnnounce(String text) {
-    return text.replaceAll(MARKUP_REMOVE, "").substring(0, Math.min(text.length(), 150)) + "...";
+  private void viewIncrement(Post post) {
+    //TODO: после разработки авторизации переделать метод под требования
+    post.setViewCount(post.getViewCount() + 1);
+    postRepository.save(post);
   }
 
   private List<RsPostDto> getRecentSorted(List<RsPostDto> defaultList) {
