@@ -1,12 +1,10 @@
 package org.example.main.controller;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.example.main.dto.response.RsPostByIdDto;
 import org.example.main.dto.response.RsPostDto;
-import org.example.main.model.Post;
 import org.example.main.service.post.ModeSorting;
 import org.example.main.service.post.PostService;
 import org.springframework.http.ResponseEntity;
