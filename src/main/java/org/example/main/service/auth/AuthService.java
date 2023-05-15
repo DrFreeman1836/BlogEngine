@@ -1,15 +1,24 @@
 package org.example.main.service.auth;
 
+import java.security.Principal;
 import java.util.Date;
 import java.util.Optional;
-import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
+import org.example.main.dto.request.LoginRequest;
 import org.example.main.dto.request.RegisterDto;
 import org.example.main.dto.response.RsErrorDto;
+import org.example.main.dto.response.RsLoginDto;
 import org.example.main.model.CaptchaCodes;
+import org.example.main.model.ModerationStatus;
 import org.example.main.model.User;
 import org.example.main.repository.CaptchaRepository;
+import org.example.main.repository.PostRepository;
 import org.example.main.repository.UserRepository;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,6 +28,26 @@ public class AuthService {
   private final CaptchaRepository captchaRepository;
 
   private final UserRepository userRepository;
+
+  private final AuthenticationManager authenticationManager;
+
+  private final PostRepository postRepository;
+
+  public RsLoginDto checkLogin(Principal principal) {
+    return getLoginUser(principal.getName());
+  }
+
+  public RsLoginDto loginUser(LoginRequest loginRequest) throws AuthenticationException {
+    Authentication auth =
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken
+            (loginRequest.getEmail(), loginRequest.getPassword()));
+
+    SecurityContextHolder.getContext().setAuthentication(auth);
+    org.springframework.security.core.userdetails.User user =
+        (org.springframework.security.core.userdetails.User) auth.getPrincipal();
+
+    return getLoginUser(user.getUsername());
+  }
 
   public RsErrorDto registerUser(RegisterDto registerDto) {
     RsErrorDto errors = new RsErrorDto();
@@ -40,6 +69,13 @@ public class AuthService {
       return null;
     }
     return errors;
+  }
+
+  private RsLoginDto getLoginUser(String email) {
+    User userCurrent = userRepository.findByEmail(email).get();
+    RsLoginDto rsLoginDto = new RsLoginDto();
+    rsLoginDto.fillFields(userCurrent, postRepository.countByModerationStatus(ModerationStatus.NEW));
+    return rsLoginDto;
   }
 
   private void registerNewUser(RegisterDto registerDto) {

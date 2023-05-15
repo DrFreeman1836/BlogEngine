@@ -45,6 +45,8 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
       + "group by date(time)", nativeQuery = true)
   List<PostGroupByDtoProjection> getGroupPostsByDate(@Param("year") Integer year);
 
+  Integer countByModerationStatus(ModerationStatus moderationStatus);
+
   interface PostGroupByDtoProjection {
 
     Date getDate();

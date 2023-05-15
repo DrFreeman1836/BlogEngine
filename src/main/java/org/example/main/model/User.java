@@ -1,5 +1,6 @@
 package org.example.main.model;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.CascadeType;
@@ -75,5 +76,9 @@ public class User {
 
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
   private List<PostComments> postCommentsList;
+
+  public String getRole() {
+    return isModerator ? Role.MODERATOR.toString() : Role.USER.toString();
+  }
 
 }
