@@ -1,5 +1,6 @@
 package org.example.main.controller;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -7,6 +8,7 @@ import org.example.main.dto.response.RsPostByIdDto;
 import org.example.main.dto.response.RsPostDto;
 import org.example.main.service.post.ModeSorting;
 import org.example.main.service.post.PostService;
+import org.example.main.service.post.StatusMode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +25,6 @@ public class ApiPostController {
   private final PostService postService;
 
   @GetMapping()
-  @PreAuthorize("hasAnyRole('USER', 'MODERATOR')")
   public ResponseEntity<Map> getPosts(
       @RequestParam(name = "offset") Integer offset, @RequestParam(name = "limit") Integer limit,
       @RequestParam(name = "mode") String modeSorting) {
@@ -32,7 +33,6 @@ public class ApiPostController {
   }
 
   @GetMapping("/search")
-  @PreAuthorize("hasAnyRole('MODERATOR')")
   public ResponseEntity<Map> searchPosts(
       @RequestParam(name = "offset") Integer offset, @RequestParam(name = "limit") Integer limit,
       @RequestParam(name = "query") String query
@@ -67,6 +67,16 @@ public class ApiPostController {
     } else {
       return ResponseEntity.status(404).build();
     }
+  }
+
+  @GetMapping("/my")
+  @PreAuthorize("hasAnyRole('USER', 'MODERATOR')")
+  public ResponseEntity<Map> getMyPost(@RequestParam(name = "offset") Integer offset,
+      @RequestParam(name = "limit") Integer limit,
+      @RequestParam(name = "status") String status,
+      Principal principal) {
+    List<RsPostDto> listPosts = postService.getMyPost(StatusMode.valueOf(status), principal);
+    return ResponseEntity.ok(Map.of("count", listPosts.size(), "posts", listPosts.stream().skip(offset).limit(limit)));
   }
 
 }

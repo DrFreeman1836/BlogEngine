@@ -12,6 +12,7 @@ import org.example.main.dto.response.RsLoginDto;
 import org.example.main.service.auth.AuthService;
 import org.example.main.service.auth.CaptchaService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -64,6 +65,7 @@ public class ApiAuthController {
   }
 
   @GetMapping("/logout")
+  @PreAuthorize("hasAnyRole('USER', 'MODERATOR')")
   public ResponseEntity<Map> logout(HttpServletRequest request) {
     try {
       request.logout();

@@ -1,5 +1,6 @@
 package org.example.main.service.post;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -8,6 +9,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.example.main.dto.response.RsLoginDto;
 import org.example.main.dto.response.RsPostByIdDto;
 import org.example.main.dto.response.RsPostDto;
 import org.example.main.model.ModerationStatus;
@@ -16,6 +18,7 @@ import org.example.main.model.Tag;
 import org.example.main.model.TagToPost;
 import org.example.main.repository.PostRepository;
 import org.example.main.repository.TagRepository;
+import org.example.main.service.auth.AuthService;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -27,6 +30,8 @@ public class PostService {
   private final TagRepository tagRepository;
 
   private static final String EMPTY_STRING = "^\\s*$";
+
+  private final AuthService authService;
 
   private static final String MARKUP_REMOVE = "/<[^>]+>/gi";
 
@@ -98,10 +103,71 @@ public class PostService {
     return null;
   }
 
+  public List<RsPostDto> getMyPost(StatusMode status, Principal principal) {
+    RsLoginDto loginUser = authService.checkLogin(principal);
+    List<Post> listPosts = postRepository.findByUserId(loginUser.getId());
+
+    switch (status) {
+      case inactive: return getInactivePosts(listPosts);
+      case pending: return getPendingPosts(listPosts);
+      case declined: return getDeclinedPosts(listPosts);
+      case published: return gePublishedPosts(listPosts);
+      default: return listPosts.stream()
+          .map(post -> {
+            RsPostDto dto = new RsPostDto();
+            dto.fillFields(post);
+            return dto;
+          }).collect(Collectors.toList());
+    }
+  }
+
   private void viewIncrement(Post post) {
-    //TODO: после разработки авторизации переделать метод под требования
     post.setViewCount(post.getViewCount() + 1);
     postRepository.save(post);
+  }
+
+  private List<RsPostDto> getInactivePosts(List<Post> defaultList) {
+    return defaultList.stream()
+        .filter(p -> !p.getIsActive())
+        .map(post -> {
+          RsPostDto dto = new RsPostDto();
+          dto.fillFields(post);
+          return dto;
+        })
+        .collect(Collectors.toList());
+  }
+
+  private List<RsPostDto> getPendingPosts(List<Post> defaultList) {
+    return defaultList.stream()
+        .filter(p -> p.getIsActive() && p.getModerationStatus().equals(ModerationStatus.NEW))
+        .map(post -> {
+          RsPostDto dto = new RsPostDto();
+          dto.fillFields(post);
+          return dto;
+        })
+        .collect(Collectors.toList());
+  }
+
+  private List<RsPostDto> getDeclinedPosts(List<Post> defaultList) {
+    return defaultList.stream()
+        .filter(p -> p.getIsActive() && p.getModerationStatus().equals(ModerationStatus.DECLINED))
+        .map(post -> {
+          RsPostDto dto = new RsPostDto();
+          dto.fillFields(post);
+          return dto;
+        })
+        .collect(Collectors.toList());
+  }
+
+  private List<RsPostDto> gePublishedPosts(List<Post> defaultList) {
+    return defaultList.stream()
+        .filter(p -> p.getIsActive() && p.getModerationStatus().equals(ModerationStatus.ACCEPTED))
+        .map(post -> {
+          RsPostDto dto = new RsPostDto();
+          dto.fillFields(post);
+          return dto;
+        })
+        .collect(Collectors.toList());
   }
 
   private List<RsPostDto> getRecentSorted(List<RsPostDto> defaultList) {
