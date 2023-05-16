@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import org.example.main.model.ModerationStatus;
 import org.example.main.model.Post;
+import org.example.main.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,6 +17,8 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
   List<Post> findByIsActiveAndModerationStatusAndTimeBefore(Boolean isActive, ModerationStatus moderationStatus, Date time);
   Integer countByIsActiveAndModerationStatusAndTimeBefore(Boolean isActive, ModerationStatus moderationStatus, Date time);
   List<Post> findByIsActiveAndModerationStatusAndTimeBeforeAndTextContaining(Boolean isActive, ModerationStatus moderationStatus, Date time, String text);
+
+  List<Post> findByUserId(Integer userId);
 
   @Query(value = "select p "
       + "from Post p "
@@ -44,6 +47,8 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
       + "year(time) = :year "
       + "group by date(time)", nativeQuery = true)
   List<PostGroupByDtoProjection> getGroupPostsByDate(@Param("year") Integer year);
+
+  Integer countByModerationStatus(ModerationStatus moderationStatus);
 
   interface PostGroupByDtoProjection {
 
