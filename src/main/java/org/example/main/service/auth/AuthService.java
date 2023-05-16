@@ -19,6 +19,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -33,8 +34,14 @@ public class AuthService {
 
   private final PostRepository postRepository;
 
+  private final PasswordEncoder passwordEncoder;
+
   public RsLoginDto checkLogin(Principal principal) {
     return getLoginUser(principal.getName());
+  }
+
+  public User getCurrentUser(Principal principal) {
+    return userRepository.findByEmail(principal.getName()).get();
   }
 
   public RsLoginDto loginUser(LoginRequest loginRequest) throws AuthenticationException {
@@ -81,7 +88,7 @@ public class AuthService {
   private void registerNewUser(RegisterDto registerDto) {
     User newUser = new User();
     newUser.setEmail(registerDto.getEmail());
-    newUser.setPassword(registerDto.getPassword());
+    newUser.setPassword(passwordEncoder.encode(registerDto.getPassword()));
     newUser.setName(registerDto.getName());
     newUser.setIsModerator(false);
     newUser.setRegTime(new Date());

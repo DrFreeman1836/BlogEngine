@@ -4,6 +4,8 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.example.main.dto.request.RqPostDto;
+import org.example.main.dto.response.RsErrors;
 import org.example.main.dto.response.RsPostByIdDto;
 import org.example.main.dto.response.RsPostDto;
 import org.example.main.service.post.ModeSorting;
@@ -13,6 +15,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -77,6 +82,27 @@ public class ApiPostController {
       Principal principal) {
     List<RsPostDto> listPosts = postService.getMyPost(StatusMode.valueOf(status), principal);
     return ResponseEntity.ok(Map.of("count", listPosts.size(), "posts", listPosts.stream().skip(offset).limit(limit)));
+  }
+
+  @PostMapping()
+  @PreAuthorize("hasAnyRole('USER')")
+  public ResponseEntity<Map> addPost(@RequestBody RqPostDto postDto, Principal principal) {
+    RsErrors errors = postService.addPost(postDto, principal);
+    if (errors == null) {
+      return ResponseEntity.ok(Map.of("result", true));
+    } else {
+      return ResponseEntity.ok(Map.of("result", false, "errors", errors));
+    }
+  }
+
+  @PutMapping("/{id}")
+  public ResponseEntity<Map> updatePost(@PathVariable Integer id, @RequestBody RqPostDto postDto, Principal principal) {
+    RsErrors errors = postService.updatePost(id, postDto, principal);
+    if (errors == null) {
+      return ResponseEntity.ok(Map.of("result", true));
+    } else {
+      return ResponseEntity.ok(Map.of("result", false, "errors", errors));
+    }
   }
 
 }

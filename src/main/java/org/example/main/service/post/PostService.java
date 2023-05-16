@@ -9,6 +9,9 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.example.main.dto.request.RqPostDto;
+import org.example.main.dto.response.RsErrorDto;
+import org.example.main.dto.response.RsErrors;
 import org.example.main.dto.response.RsLoginDto;
 import org.example.main.dto.response.RsPostByIdDto;
 import org.example.main.dto.response.RsPostDto;
@@ -16,9 +19,11 @@ import org.example.main.model.ModerationStatus;
 import org.example.main.model.Post;
 import org.example.main.model.Tag;
 import org.example.main.model.TagToPost;
+import org.example.main.model.User;
 import org.example.main.repository.PostRepository;
 import org.example.main.repository.TagRepository;
 import org.example.main.service.auth.AuthService;
+import org.example.main.service.general.TagService;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -32,6 +37,8 @@ public class PostService {
   private static final String EMPTY_STRING = "^\\s*$";
 
   private final AuthService authService;
+
+  private final TagService tagService;
 
   private static final String MARKUP_REMOVE = "/<[^>]+>/gi";
 
@@ -121,9 +128,81 @@ public class PostService {
     }
   }
 
+  public RsErrors addPost(RqPostDto postDto, Principal principal) {
+    Date date = postDto.getTimestamp();
+    RsErrors errors = null;
+    errors = checkPost(errors, postDto);
+    if (errors != null) {
+      return errors;
+    }
+    if (date.before(new Date())) {
+      date = new Date();
+    }
+
+    User user = authService.getCurrentUser(principal);
+    createPost(postDto, date, user);
+    return null;
+  }
+
+  public RsErrors updatePost(Integer idPost, RqPostDto postDto, Principal principal) {
+    Date date = postDto.getTimestamp();
+    RsErrors errors = null;
+    errors = checkPost(errors, postDto);
+    if (errors != null) {
+      return errors;
+    }
+    if (date.before(new Date())) {
+      date = new Date();
+    }
+
+    User user = authService.getCurrentUser(principal);
+    Post post = postRepository.getById(idPost);
+    post.setText(post.getText());
+    post.setTitle(post.getTitle());
+    post.setIsActive(postDto.getActive() == 1);
+    post.setTime(date);
+    post.setModerationStatus(!user.getIsModerator() ? ModerationStatus.NEW : post.getModerationStatus());
+    tagService.updateTagToPost(post, postDto.getTags());
+    postRepository.save(post);
+    return null;
+  }
+
+  private RsErrors checkPost(RsErrors errors, RqPostDto postDto) {
+    String title = postDto.getTitle();
+    String text = postDto.getText();
+    if (title == null || title.length() < 3) {
+      errors = new RsErrors();
+      errors.setTitle("Заголовок не установлен или слишком короткий");
+    }
+    if (text == null || text.length() < 50) {
+      errors = errors == null ? new RsErrors() : errors;
+      errors.setText("Текс публикации слишком короткий или не установлен");
+    }
+    return errors;
+  }
+
+  private void createPost(RqPostDto postDto, Date time, User user) {
+    Post newPost = new Post();
+    newPost.setText(postDto.getText());
+    newPost.setTitle(postDto.getTitle());
+    newPost.setIsActive(postDto.getActive() == 1);
+    newPost.setModerationStatus(ModerationStatus.NEW);
+    newPost.setUser(user);
+    newPost.setTime(time);
+    newPost.setViewCount(0);
+    Post post = postRepository.save(newPost);
+    createTag(post, postDto.getTags());
+  }
+
+  private void createTag(Post post, List<String> tags) {
+    tagService.addTag(post, tags);
+  }
+
   private void viewIncrement(Post post) {
+    //TODO: изменить по требованиям
     post.setViewCount(post.getViewCount() + 1);
     postRepository.save(post);
+    postRepository.flush();
   }
 
   private List<RsPostDto> getInactivePosts(List<Post> defaultList) {

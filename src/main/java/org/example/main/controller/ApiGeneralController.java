@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.example.main.dto.request.RqCommentDto;
 import org.example.main.dto.response.RsGlobalSettingsDto;
 import org.example.main.dto.response.RsInfoBlogDto;
 import org.example.main.service.general.CalendarService;
@@ -12,6 +13,8 @@ import org.example.main.service.general.GlobalSettingService;
 import org.example.main.service.general.TagService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -56,6 +59,12 @@ public class ApiGeneralController {
     response.put("years", calendarService.getAllYearPublish());
     response.put("posts", calendarService.getGroupPostsByDate(year));
     return ResponseEntity.ok(response);
+  }
+
+  @PostMapping("/comment")
+  public ResponseEntity<Map> addComment(@RequestBody RqCommentDto commentDto) {
+    //
+    return null;
   }
 
 }
