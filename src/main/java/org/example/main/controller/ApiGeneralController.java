@@ -1,17 +1,21 @@
 package org.example.main.controller;
 
+import java.security.Principal;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.example.main.dto.request.RqCommentDto;
+import org.example.main.dto.response.RsErrors;
 import org.example.main.dto.response.RsGlobalSettingsDto;
 import org.example.main.dto.response.RsInfoBlogDto;
 import org.example.main.service.general.CalendarService;
+import org.example.main.service.general.CommentService;
 import org.example.main.service.general.GlobalSettingService;
 import org.example.main.service.general.TagService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,6 +35,8 @@ public class ApiGeneralController {
   private final TagService tagService;
 
   private final CalendarService calendarService;
+
+  private final CommentService commentService;
 
   @GetMapping("/init")
   public ResponseEntity<RsInfoBlogDto> getInfoOfBlog() {
@@ -62,9 +68,14 @@ public class ApiGeneralController {
   }
 
   @PostMapping("/comment")
-  public ResponseEntity<Map> addComment(@RequestBody RqCommentDto commentDto) {
-    //
-    return null;
+  @PreAuthorize("hasAnyRole('USER', 'MODERATOR')")
+  public ResponseEntity<Map> addComment(@RequestBody RqCommentDto commentDto, Principal principal) {
+    RsErrors errors = commentService.addCommentToPost(commentDto, principal);
+    if (errors == null) {
+      return ResponseEntity.ok(Map.of("result", true));
+    } else {
+      return ResponseEntity.status(400).body(Map.of("result", false, "errors", errors));
+    }
   }
 
 }

@@ -5,11 +5,13 @@ import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.example.main.dto.request.RqPostDto;
+import org.example.main.dto.request.RqVotesDto;
 import org.example.main.dto.response.RsErrors;
 import org.example.main.dto.response.RsPostByIdDto;
 import org.example.main.dto.response.RsPostDto;
 import org.example.main.service.post.ModeSorting;
 import org.example.main.service.post.PostService;
+import org.example.main.service.post.PostVotesService;
 import org.example.main.service.post.StatusMode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,6 +30,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class ApiPostController {
 
   private final PostService postService;
+
+  private final PostVotesService votesService;
 
   @GetMapping()
   public ResponseEntity<Map> getPosts(
@@ -96,6 +100,7 @@ public class ApiPostController {
   }
 
   @PutMapping("/{id}")
+  @PreAuthorize("hasAnyRole('USER', 'MODERATOR')")
   public ResponseEntity<Map> updatePost(@PathVariable Integer id, @RequestBody RqPostDto postDto, Principal principal) {
     RsErrors errors = postService.updatePost(id, postDto, principal);
     if (errors == null) {
@@ -103,6 +108,20 @@ public class ApiPostController {
     } else {
       return ResponseEntity.ok(Map.of("result", false, "errors", errors));
     }
+  }
+
+  @PostMapping("/like")
+  @PreAuthorize("hasAnyRole('USER', 'MODERATOR')")
+  public ResponseEntity<Map> addLike(@RequestBody RqVotesDto votesDto, Principal principal) {
+    return votesService.addLike(votesDto.getPostId(), principal) ? ResponseEntity.ok(Map.of("result", true)) :
+        ResponseEntity.ok(Map.of("result", false));
+  }
+
+  @PostMapping("/dislike")
+  @PreAuthorize("hasAnyRole('USER', 'MODERATOR')")
+  public ResponseEntity<Map> addDislike(@RequestBody RqVotesDto votesDto, Principal principal) {
+    return votesService.addDislike(votesDto.getPostId(), principal) ? ResponseEntity.ok(Map.of("result", true)) :
+        ResponseEntity.ok(Map.of("result", false));
   }
 
 }

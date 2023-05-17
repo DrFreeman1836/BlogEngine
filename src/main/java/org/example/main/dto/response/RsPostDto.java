@@ -30,7 +30,7 @@ public class RsPostDto {
 
   private Integer viewCount;
 
-  private static final String MARKUP_REMOVE = "/<[^>]+>/gi";
+  private static final String MARKUP_REMOVE = "\\<.*?>";
 
   public void fillFields(Post post) {
     this.id = post.getId();
@@ -45,7 +45,8 @@ public class RsPostDto {
   }
 
   private String getAnnounce(String text) {
-    return text.replaceAll(MARKUP_REMOVE, "").substring(0, Math.min(text.length(), 150)) + "...";
+    String textOutTag = text.replaceAll(MARKUP_REMOVE, "");
+    return textOutTag.substring(0, Math.min(textOutTag.length(), 150)) + "...";
   }
 
 }

@@ -85,8 +85,8 @@ public class TagService {
   }
 
   private BigDecimal calculateWeights(Integer countTags, Integer countAllPosts, Integer countPopularTag) {
-    BigDecimal dWight = BigDecimal.valueOf(countTags).divide(BigDecimal.valueOf(countAllPosts)).setScale(2);
-    BigDecimal dWightMax = BigDecimal.valueOf(countPopularTag).divide(BigDecimal.valueOf(countAllPosts)).setScale(2);
+    BigDecimal dWight = BigDecimal.valueOf(countTags).divide(BigDecimal.valueOf(countAllPosts), 2, BigDecimal.ROUND_DOWN);
+    BigDecimal dWightMax = BigDecimal.valueOf(countPopularTag).divide(BigDecimal.valueOf(countAllPosts), 2, BigDecimal.ROUND_DOWN);
     BigDecimal k = new BigDecimal("1.0").divide(dWightMax, 2, BigDecimal.ROUND_DOWN);
     return dWight.multiply(k).setScale(2, BigDecimal.ROUND_DOWN);
   }
