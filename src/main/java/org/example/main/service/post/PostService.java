@@ -199,7 +199,6 @@ public class PostService {
   }
 
   private void viewIncrement(Post post) {
-    //TODO: изменить по требованиям
     post.setViewCount(post.getViewCount() + 1);
     postRepository.save(post);
     postRepository.flush();
