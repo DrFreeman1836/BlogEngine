@@ -4,12 +4,15 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.example.main.dto.request.RqModerationStatus;
 import org.example.main.dto.request.RqPostDto;
 import org.example.main.dto.request.RqVotesDto;
 import org.example.main.dto.response.RsErrors;
 import org.example.main.dto.response.RsPostByIdDto;
 import org.example.main.dto.response.RsPostDto;
+import org.example.main.model.ModerationStatus;
 import org.example.main.service.post.ModeSorting;
+import org.example.main.service.post.ModerationService;
 import org.example.main.service.post.PostService;
 import org.example.main.service.post.PostVotesService;
 import org.example.main.service.post.StatusMode;
@@ -32,6 +35,8 @@ public class ApiPostController {
   private final PostService postService;
 
   private final PostVotesService votesService;
+
+  private final ModerationService moderationService;
 
   @GetMapping()
   public ResponseEntity<Map> getPosts(
@@ -122,6 +127,14 @@ public class ApiPostController {
   public ResponseEntity<Map> addDislike(@RequestBody RqVotesDto votesDto, Principal principal) {
     return votesService.addDislike(votesDto.getPostId(), principal) ? ResponseEntity.ok(Map.of("result", true)) :
         ResponseEntity.ok(Map.of("result", false));
+  }
+
+  @GetMapping("/moderation")
+  @PreAuthorize("hasAnyRole('MODERATOR')")
+  public ResponseEntity<Map> getPostsToModeration(@RequestParam(name = "offset") Integer offset,
+      @RequestParam(name = "limit") Integer limit, @RequestParam(name = "status") String status) {
+    List<RsPostDto> listPosts = moderationService.getPostsToModeration(ModerationStatus.valueOf(status.toUpperCase()));
+    return ResponseEntity.ok(Map.of("count", listPosts.size(), "posts", listPosts));
   }
 
 }

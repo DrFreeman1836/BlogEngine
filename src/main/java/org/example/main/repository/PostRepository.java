@@ -18,6 +18,8 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
   Integer countByIsActiveAndModerationStatusAndTimeBefore(Boolean isActive, ModerationStatus moderationStatus, Date time);
   List<Post> findByIsActiveAndModerationStatusAndTimeBeforeAndTextContaining(Boolean isActive, ModerationStatus moderationStatus, Date time, String text);
 
+  List<Post> findByIsActiveAndModerationStatus(Boolean isActive, ModerationStatus status);
+
   List<Post> findByUserId(Integer userId);
 
   @Query(value = "select p "
